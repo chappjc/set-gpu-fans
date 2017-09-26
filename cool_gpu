@@ -55,7 +55,7 @@ do \
         ${dir}/xorg.conf >> ${cfg}
     # we keep one X server per GPU running indefinitely
     # (if we let the X server die, the fan config does not persist, no matter what else)
-    xinit ${dir}/nvscmd run_forever -- :${disp} -once -config ${cfg} &
+    xinit ${dir}/nvscmd run_forever ${disp} -- :${disp} -once &
     disp=$((disp+1))
     sleep 10
     rm -f ${cfg}

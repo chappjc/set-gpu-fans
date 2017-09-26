@@ -66,7 +66,8 @@ if ("x$1" == "x" || "x$1" == "xstart" || "x$1" == "x-display") then
     # this means "use heuristic"
     @ target = -3
 else
-    @ target = $1
+    @ target = -3
+    @ gpu = $1
 endif
 
 if ("x$1" != "x" && "x$1" != "x-display") then
@@ -82,7 +83,8 @@ loop:
 
     if ($target == -3) then
         # execute heuristic
-        set foo = (`/usr/bin/nvidia-smi dmon -s p -c 1 | sort -n -k3 | tail -1`)
+        @ top = (( 3 + $gpu ))
+        set foo = (`/usr/bin/nvidia-smi dmon -s p -c 1 | head -n $top | tail -1`)
         @ temp = $foo[3]
         @ target = -2
         if (${temp} < 29) then
@@ -110,12 +112,12 @@ loop:
             @ target = 85
         endif
         if (${target} == -2 || ${target} == ${last_target} || ${target} == ${last_friendly_target}) then
-            echo "Current temperature is ${temp}.  No adjustments needed."
+            echo "${gpu} Current temperature is ${temp}.  No adjustments needed."
         else
             if (${target} >= 0) then
-                echo "Current temperature is ${temp}.  Setting fan speed to ${target} (from ${last_friendly_target})."
+                echo "${gpu} Current temperature is ${temp}.  Setting fan speed to ${target} (from ${last_friendly_target})."
             else
-                echo "Current temperature is ${temp}.  Setting fan speed to AUTO."            
+                echo "${gpu} Current temperature is ${temp}.  Setting fan speed to AUTO."            
             endif
         endif
     endif
@@ -123,12 +125,12 @@ loop:
     if (${last_target} != ${target} && ${last_friendly_target} != ${target}) then
         # relinquish fan speed control back to the system
         if ("x${target}" == "x-1") then
-            /usr/bin/nvidia-settings -a '[gpu:0]/GPUFanControlState=0'  $*
+            /usr/bin/nvidia-settings -a "[gpu:$gpu]/GPUFanControlState=0"  $*
         endif
     
         # set fan speed on primary GPU to target
         if (${target} >= 0) then
-            /usr/bin/nvidia-settings -a '[gpu:0]/GPUFanControlState=1' -a '[fan:0]/GPUTargetFanSpeed='${target}  $*
+            /usr/bin/nvidia-settings -a "[gpu:$gpu]/GPUFanControlState=1" -a "[fan:$gpu]/GPUTargetFanSpeed="${target}  $*
         endif
     endif
 
