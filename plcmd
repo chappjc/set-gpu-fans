@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ "x$1" == "xrun_forever" ]; then
+    run_forever=1
+    shift
+else
+    run_forever=0
+fi
+
+gpu=$1
+
+
+until [ $run_forever -eq 0 ]; do
+
+    /usr/bin/nvidia-settings -a "GPUPowerMizerMode=1"
+
+    sleep 500000
+done
+
